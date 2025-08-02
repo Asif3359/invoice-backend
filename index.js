@@ -53,8 +53,8 @@ app.get('/test', (req, res) => {
 // Create associate (POST /associates)
 app.post('/associates', async (req, res) => {
   try {
-    console.log("HEADERS:", req.headers);
-    console.log("BODY:", req.body);
+    // console.log("HEADERS:", req.headers);
+    // console.log("BODY:", req.body);
     const { userEmail, data } = req.body;
     if (!userEmail || !data) return res.status(400).send("Missing userEmail or data");
     if (!data.id) return res.status(400).send("Missing id field in data");
@@ -94,6 +94,8 @@ app.get('/associates/:userEmail', async (req, res) => {
 // Update associate by UUID 'id' field
 app.put('/associates/:id', async (req, res) => {
   try {
+    console.log("HEADERS:", req.headers);
+    console.log("BODY:", req.body);
     const id = req.params.id; // this is UUID, not Mongo _id
     const { userEmail, data } = req.body;
     if (!userEmail || !data) return res.status(400).send("Missing userEmail or data");
@@ -108,7 +110,7 @@ app.put('/associates/:id', async (req, res) => {
       { id: id, userEmail },
       { $set: updateData }
     );
-
+    console.log(result);
     if (result.matchedCount === 0) return res.status(404).send("Associate not found or no permission");
     res.send({ success: true });
   } catch (error) {
