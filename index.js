@@ -111,7 +111,7 @@ app.put('/associates/:id', async (req, res) => {
       { $set: updateData }
     );
     console.log(result);
-    if (result.matchedCount === 0) return res.status(404).send("Associate not found or no permission");
+    if (result.modifiedCount === 0) return res.status(404).send("Associate not found or no permission");
     res.send({ success: true });
   } catch (error) {
     console.error(error);
