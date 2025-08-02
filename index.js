@@ -57,7 +57,7 @@ app.post('/associates', async (req, res) => {
     console.log("BODY:", req.body);
     const { userEmail, data } = req.body;
     if (!userEmail || !data) return res.status(400).send("Missing userEmail or data");
-    // if (!data.id) return res.status(400).send("Missing id field in data");
+    if (!data.id) return res.status(400).send("Missing id field in data");
 
     const associate = {
       ...data,
