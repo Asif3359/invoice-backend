@@ -5,6 +5,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 5000;
 app.use(express.json());
+const { v4: uuidv4 } = require('uuid');
 // const serverless = require('serverless-http');
 // console.log("✅ Express serverless function initialized");
 
@@ -56,10 +57,11 @@ app.post('/associates', async (req, res) => {
     console.log("BODY:", req.body);
     const { userEmail, data } = req.body;
     if (!userEmail || !data) return res.status(400).send("Missing userEmail or data");
-    if (!data.id) return res.status(400).send("Missing id field in data");
+    // if (!data.id) return res.status(400).send("Missing id field in data");
 
     const associate = {
       ...data,
+      id: uuidv4(),
       userEmail,
       synced: 0,
       createdAt: new Date(),
