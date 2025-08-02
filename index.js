@@ -3,8 +3,10 @@ const express = require('express');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 const app = express();
-const port = 5000;
+const port = process.env.PORT || 5000;
 app.use(express.json());
+// const serverless = require('serverless-http');
+// console.log("✅ Express serverless function initialized");
 
 // MongoDB URI
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.gdf4x.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -42,10 +44,16 @@ app.get('/', (req, res) => {
   res.send('Hello world 🌍');
 });
 
+app.get('/test', (req, res) => {
+  res.send('testing 🌍');
+});
+
 // associate codes:
 // Create associate (POST /associates)
 app.post('/associates', async (req, res) => {
   try {
+    console.log("HEADERS:", req.headers);
+    console.log("BODY:", req.body);
     const { userEmail, data } = req.body;
     if (!userEmail || !data) return res.status(400).send("Missing userEmail or data");
     if (!data.id) return res.status(400).send("Missing id field in data");
@@ -60,7 +68,9 @@ app.post('/associates', async (req, res) => {
     };
 
     const result = await associatesCollection.insertOne(associate);
-    res.status(201).send(associate);
+    console.log("Inserted", associate);
+    console.log("result", result)
+    res.status(201).send(result);
   } catch (error) {
     console.error(error);
     res.status(500).send("Error creating associate");
@@ -165,6 +175,8 @@ app.post('/associates/sync', async (req, res) => {
 
 
 
-app.listen(port,'0.0.0.0', () => {
+app.listen(port, () => {
   console.log("🚀 Server is running on port: " + port);
 });
+
+// module.exports.handler = serverless(app);
