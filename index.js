@@ -81,7 +81,7 @@ app.post('/associates', async (req, res) => {
 app.get('/associates/:userEmail', async (req, res) => {
   try {
     const { userEmail } = req.params;
-    const associates = await associatesCollection.find({ userEmail, deleted: false }).toArray();
+    const associates = await associatesCollection.find({ userEmail, deleted: 0 }).toArray();
     res.send(associates);
   } catch (error) {
     console.error(error);
@@ -101,7 +101,7 @@ app.put('/associates/:id', async (req, res) => {
     const updateData = {
       ...data,
       updatedAt: new Date(),
-      synced: false,
+      synced: 0,
     };
 
     const result = await associatesCollection.updateOne(
