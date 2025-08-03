@@ -154,7 +154,7 @@ app.post('/associates/sync', async (req, res) => {
         updateOne: {
           filter,
           update: {
-            $set: { ...item, userEmail, updatedAt, synced: true, deleted: item.deleted || false },
+            $set: { ...item, userEmail, updatedAt, synced: 1, deleted: item.deleted || 0 },
             $setOnInsert: { createdAt: new Date() },
           },
           upsert: true,
@@ -166,7 +166,7 @@ app.post('/associates/sync', async (req, res) => {
       await associatesCollection.bulkWrite(bulkOps);
     }
 
-    const freshData = await associatesCollection.find({ userEmail, deleted: false }).toArray();
+    const freshData = await associatesCollection.find({ userEmail }).toArray();
 
     res.send({ success: true, data: freshData });
   } catch (error) {
