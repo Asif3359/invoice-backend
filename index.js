@@ -138,9 +138,9 @@ app.delete('/associates/:id', async (req, res) => {
 });
 
 app.post('/associates/sync', async (req, res) => {
-
   console.log("HEADERS:", req.headers);
   console.log("BODY:", req.body);
+
   try {
     const { userEmail, associates } = req.body;
     if (!userEmail || !Array.isArray(associates)) {
@@ -148,19 +148,59 @@ app.post('/associates/sync', async (req, res) => {
     }
 
     const bulkOps = associates.map((item) => {
-      // Use the UUID 'id' field as identifier
       const filter = { id: item.id, userEmail };
 
-      const updatedAt = item.updatedAt ? new Date(item.updatedAt) : new Date();
+      const {
+        createdAt, // remove from $set
+        id,
+        organizationName,
+        email,
+        address,
+        contact,
+        openingBalance,
+        clientName,
+        supplierName,
+        shippingAddress,
+        taxId,
+        businessDetail,
+        associateType,
+        unpaidCount,
+        totalCount,
+        balance,
+        deleted,
+        updatedAt = new Date()
+      } = item;
 
       return {
         updateOne: {
           filter,
           update: {
-            $set: { ...item, userEmail, updatedAt, synced: 1, deleted: item.deleted || 0 },
-            $setOnInsert: { createdAt: new Date() },
+            $set: {
+              id,
+              organizationName,
+              email,
+              address,
+              contact,
+              openingBalance,
+              clientName,
+              supplierName,
+              shippingAddress,
+              taxId,
+              businessDetail,
+              associateType,
+              unpaidCount,
+              totalCount,
+              balance,
+              updatedAt: new Date(updatedAt),
+              synced: 1,
+              deleted,
+              userEmail
+            },
+            $setOnInsert: {
+              createdAt: createdAt ? new Date(createdAt) : new Date()
+            }
           },
-          upsert: true,
+          upsert: true
         }
       };
     });
@@ -170,13 +210,14 @@ app.post('/associates/sync', async (req, res) => {
     }
 
     const freshData = await associatesCollection.find({ userEmail }).toArray();
-
     res.send({ success: true, data: freshData });
+
   } catch (error) {
     console.error(error);
     res.status(500).send("Error syncing associates");
   }
 });
+
 
 
 
