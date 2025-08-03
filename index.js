@@ -92,8 +92,8 @@ app.get('/associates/:userEmail', async (req, res) => {
 // Update associate by UUID 'id' field
 app.put('/associates/:id', async (req, res) => {
   try {
-    console.log("HEADERS:", req.headers);
-    console.log("BODY:", req.body);
+    // console.log("HEADERS:", req.headers);
+    // console.log("BODY:", req.body);
     const id = req.params.id; // this is UUID, not Mongo _id
     const { userEmail, data } = req.body;
     if (!userEmail || !data) return res.status(400).send("Missing userEmail or data");
@@ -138,6 +138,9 @@ app.delete('/associates/:id', async (req, res) => {
 });
 
 app.post('/associates/sync', async (req, res) => {
+
+  console.log("HEADERS:", req.headers);
+  console.log("BODY:", req.body);
   try {
     const { userEmail, associates } = req.body;
     if (!userEmail || !Array.isArray(associates)) {
