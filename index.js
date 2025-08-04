@@ -231,9 +231,99 @@ app.delete('/products/:id', async (req, res) => {
 });
 
 
+// payments
+// ✅ 1. Add Payment (POST /payments)
+app.post('/payments', async (req, res) => {
+  try {
+    const { userEmail, data } = req.body;
+    if (!userEmail || !data) return res.status(400).send("Missing userEmail or data");
+    if (!data.id) return res.status(400).send("Missing id field in data");
 
+    const payment = {
+      ...data,
+      userEmail,
+      synced: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      deleted: 0
+    };
 
-// sync associate :
+    const result = await paymentsCollection.insertOne(payment);
+    res.status(201).send(result);
+  } catch (error) {
+    console.error("Error creating payment:", error);
+    res.status(500).send("Error creating payment");
+  }
+});
+
+// ✅ 2. Update Payment by ID (PUT /payments/:id)
+app.put('/payments/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { userEmail, data } = req.body;
+
+    if (!userEmail || !data) return res.status(400).send("Missing userEmail or data");
+
+    const updateData = {
+      ...data,
+      updatedAt: new Date(),
+      synced: 0
+    };
+
+    const result = await paymentsCollection.updateOne(
+      { id: id, userEmail },
+      { $set: updateData }
+    );
+
+    if (result.modifiedCount === 0) return res.status(404).send("Payment not found or no permission");
+    res.send({ success: true });
+  } catch (error) {
+    console.error("Error updating payment:", error);
+    res.status(500).send("Error updating payment");
+  }
+});
+
+// ✅ 3. Get All Payments for a User (GET /payments/:userEmail)
+Edit
+app.get('/payments/:userEmail', async (req, res) => {
+  try {
+    const { userEmail } = req.params;
+    const payments = await paymentsCollection.find({ userEmail, deleted: 0 }).toArray();
+    res.send(payments);
+  } catch (error) {
+    console.error("Error fetching payments:", error);
+    res.status(500).send("Error fetching payments");
+  }
+});
+// ✅ 4. Soft Delete Payment (DELETE /payments/:id)
+app.delete('/payments/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { userEmail } = req.body;
+
+    if (!userEmail) return res.status(400).send("Missing userEmail");
+
+    const result = await paymentsCollection.updateOne(
+      { id: id, userEmail },
+      {
+        $set: {
+          deleted: 1,
+          updatedAt: new Date(),
+          synced: 0
+        }
+      }
+    );
+
+    if (result.matchedCount === 0) return res.status(404).send("Payment not found or no permission");
+    res.send({ success: true });
+  } catch (error) {
+    console.error("Error deleting payment:", error);
+    res.status(500).send("Error deleting payment");
+  }
+});
+
+// syncing codes:
+// sync associates :
 app.post('/associates/sync', async (req, res) => {
   try {
     const { userEmail, associates } = req.body;
@@ -317,7 +407,7 @@ app.post('/associates/sync', async (req, res) => {
   }
 });
 
-
+// sync products :
 app.post('/products/sync', async (req, res) => {
   try {
     const { userEmail, products } = req.body;
@@ -396,7 +486,71 @@ app.post('/products/sync', async (req, res) => {
   }
 });
 
+// ✅ 5. Sync Payments (POST /payments/sync)
+app.post('/payments/sync', async (req, res) => {
+  try {
+    const { userEmail, payments } = req.body;
+    if (!userEmail || !Array.isArray(payments)) {
+      return res.status(400).send("Missing userEmail or invalid payments array");
+    }
 
+    const bulkOps = payments.map((item) => {
+      const filter = { id: item.id, userEmail };
+      const {
+        id,
+        invoiceId,
+        amount,
+        method,
+        date,
+        note,
+        advance,
+        createdAt,
+        updatedAt = new Date(),
+        deleted
+      } = item;
+
+      return {
+        updateOne: {
+          filter,
+          update: {
+            $set: {
+              id,
+              invoiceId,
+              amount,
+              method,
+              date,
+              note,
+              advance,
+              updatedAt: new Date(updatedAt),
+              deleted,
+              userEmail,
+              synced: 0
+            },
+            $setOnInsert: {
+              createdAt: createdAt ? new Date(createdAt) : new Date()
+            }
+          },
+          upsert: true
+        }
+      };
+    });
+
+    if (bulkOps.length > 0) {
+      await paymentsCollection.bulkWrite(bulkOps);
+    }
+
+    const freshData = await paymentsCollection
+      .find({ userEmail })
+      .project({ userEmail: 0 }) // Optional
+      .toArray();
+
+    res.send({ success: true, data: freshData });
+
+  } catch (error) {
+    console.error("❌ Payment sync error:", error);
+    res.status(500).send("Error syncing payments");
+  }
+});
 
 
 
