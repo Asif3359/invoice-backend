@@ -209,7 +209,11 @@ app.post('/associates/sync', async (req, res) => {
       await associatesCollection.bulkWrite(bulkOps);
     }
 
-    const freshData = await associatesCollection.find({ userEmail }).toArray();
+    const freshData = await associatesCollection
+      .find({ userEmail })
+      .project({ userEmail: 0 })  // 0 means "exclude this field"
+      .toArray();
+
     res.send({ success: true, data: freshData });
 
   } catch (error) {
