@@ -138,11 +138,9 @@ app.delete('/associates/:id', async (req, res) => {
 });
 
 app.post('/associates/sync', async (req, res) => {
-  console.log("HEADERS:", req.headers);
-  console.log("BODY:", req.body);
-
   try {
     const { userEmail, associates } = req.body;
+
     if (!userEmail || !Array.isArray(associates)) {
       return res.status(400).send("Missing userEmail or invalid associates array");
     }
@@ -151,7 +149,7 @@ app.post('/associates/sync', async (req, res) => {
       const filter = { id: item.id, userEmail };
 
       const {
-        createdAt, // remove from $set
+        createdAt,
         id,
         organizationName,
         email,
@@ -192,9 +190,9 @@ app.post('/associates/sync', async (req, res) => {
               totalCount,
               balance,
               updatedAt: new Date(updatedAt),
-              synced: 1,
               deleted,
-              userEmail
+              userEmail,
+              synced: 0 // ✅ Always store with synced:0 in the DB
             },
             $setOnInsert: {
               createdAt: createdAt ? new Date(createdAt) : new Date()
@@ -211,16 +209,17 @@ app.post('/associates/sync', async (req, res) => {
 
     const freshData = await associatesCollection
       .find({ userEmail })
-      .project({ userEmail: 0 })  // 0 means "exclude this field"
+      .project({ userEmail: 0 })  // remove userEmail from result
       .toArray();
 
     res.send({ success: true, data: freshData });
 
   } catch (error) {
-    console.error(error);
+    console.error("❌ Sync error:", error);
     res.status(500).send("Error syncing associates");
   }
 });
+
 
 
 
