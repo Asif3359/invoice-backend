@@ -284,7 +284,6 @@ app.put('/payments/:id', async (req, res) => {
 });
 
 // ✅ 3. Get All Payments for a User (GET /payments/:userEmail)
-Edit
 app.get('/payments/:userEmail', async (req, res) => {
   try {
     const { userEmail } = req.params;
