@@ -21,10 +21,10 @@
     "cookie-parser": "~1.4.6",
     "cors": "^2.8.5",
     "debug": "~2.6.9",
-    "dotenv": "^17.2.0",
+    "dotenv": "^17.2.2",
     "express": "^5.1.0",
-    "morgan": "~1.9.1",
     "mongodb": "^6.17.0",
+    "morgan": "~1.9.1",
     "serverless-http": "^3.2.0",
     "uuid": "^11.1.0"
   },
