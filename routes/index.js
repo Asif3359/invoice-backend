@@ -7,6 +7,8 @@ const productsRouter = require('./api/products');
 const paymentsRouter = require('./api/payments');
 const invoicesRouter = require('./api/invoices');
 const purchasesRouter = require('./api/purchases');
+const commissionAgentsRouter = require('./api/commissionAgents');
+const commissionHistoryRouter = require('./api/commissionHistory');
 
 // Basic routes
 router.get('/', (req, res) => {
@@ -26,5 +28,7 @@ router.use('/products', productsRouter);
 router.use('/payments', paymentsRouter);
 router.use('/invoices', invoicesRouter);
 router.use('/purchases', purchasesRouter);
+router.use('/commission-agents', commissionAgentsRouter);
+router.use('/commission-history', commissionHistoryRouter);
 
 module.exports = router;
