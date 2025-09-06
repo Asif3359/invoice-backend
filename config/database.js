@@ -6,7 +6,7 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 
 const uri = process.env.MONGO_URI;
 // MongoDB URI
-// const uri = process.env.MONGO_URI || `mongodb://localhost:27017/invoiceApp`;
+// const uri = `mongodb://localhost:27017/invoiceApp`;
 
 // MongoDB Client
 const client = new MongoClient(uri, {
@@ -41,7 +41,8 @@ const createDatabaseAndCollections = async (dbInstance) => {
       'purchaseItems',
       'purchasePayments',
       'commissionAgents',
-      'commissionHistory'
+      'commissionHistory',
+      'expenses'
     ];
     
     // Create collections that don't exist
@@ -79,6 +80,7 @@ const connectDB = async () => {
     collections.purchasePayments = db.collection("purchasePayments");
     collections.commissionAgents = db.collection("commissionAgents");
     collections.commissionHistory = db.collection("commissionHistory");
+    collections.expenses = db.collection("expenses");
 
     console.log("✅ Connected to MongoDB and collections initialized.");
   } catch (error) {
@@ -109,6 +111,7 @@ const getPurchaseItemsCollection = () => getCollection('purchaseItems');
 const getPurchasePaymentsCollection = () => getCollection('purchasePayments');
 const getCommissionAgentsCollection = () => getCollection('commissionAgents');
 const getCommissionHistoryCollection = () => getCollection('commissionHistory');
+const getExpensesCollection = () => getCollection('expenses');
 
 module.exports = {
   connectDB,
@@ -125,6 +128,7 @@ module.exports = {
   getPurchasePaymentsCollection,
   getCommissionAgentsCollection,
   getCommissionHistoryCollection,
+  getExpensesCollection,
   // Legacy exports for backward compatibility
   associatesCollection: () => getCollection('associates'),
   productsCollection: () => getCollection('products'),
@@ -135,5 +139,6 @@ module.exports = {
   purchaseItemsCollection: () => getCollection('purchaseItems'),
   purchasePaymentsCollection: () => getCollection('purchasePayments'),
   commissionAgentsCollection: () => getCollection('commissionAgents'),
-  commissionHistoryCollection: () => getCollection('commissionHistory')
+  commissionHistoryCollection: () => getCollection('commissionHistory'),
+  expensesCollection: () => getCollection('expenses')
 };
