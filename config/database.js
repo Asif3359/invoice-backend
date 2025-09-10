@@ -4,9 +4,9 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 // // MongoDB URI
 // const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.gdf4x.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
-const uri = process.env.MONGO_URI;
+// const uri = process.env.MONGO_URI;
 // MongoDB URI
-// const uri = `mongodb://localhost:27017/invoiceApp`;
+const uri = `mongodb://localhost:27017/invoiceApp`;
 
 // MongoDB Client
 const client = new MongoClient(uri, {
@@ -42,7 +42,8 @@ const createDatabaseAndCollections = async (dbInstance) => {
       'purchasePayments',
       'commissionAgents',
       'commissionHistory',
-      'expenses'
+      'expenses',
+      'creditNotes'
     ];
     
     // Create collections that don't exist
@@ -81,6 +82,7 @@ const connectDB = async () => {
     collections.commissionAgents = db.collection("commissionAgents");
     collections.commissionHistory = db.collection("commissionHistory");
     collections.expenses = db.collection("expenses");
+    collections.creditNotes = db.collection("creditNotes");
 
     console.log("✅ Connected to MongoDB and collections initialized.");
   } catch (error) {
@@ -112,6 +114,7 @@ const getPurchasePaymentsCollection = () => getCollection('purchasePayments');
 const getCommissionAgentsCollection = () => getCollection('commissionAgents');
 const getCommissionHistoryCollection = () => getCollection('commissionHistory');
 const getExpensesCollection = () => getCollection('expenses');
+const getCreditNotesCollection = () => getCollection('creditNotes');
 
 module.exports = {
   connectDB,
@@ -129,6 +132,7 @@ module.exports = {
   getCommissionAgentsCollection,
   getCommissionHistoryCollection,
   getExpensesCollection,
+  getCreditNotesCollection,
   // Legacy exports for backward compatibility
   associatesCollection: () => getCollection('associates'),
   productsCollection: () => getCollection('products'),
@@ -140,5 +144,6 @@ module.exports = {
   purchasePaymentsCollection: () => getCollection('purchasePayments'),
   commissionAgentsCollection: () => getCollection('commissionAgents'),
   commissionHistoryCollection: () => getCollection('commissionHistory'),
-  expensesCollection: () => getCollection('expenses')
+  expensesCollection: () => getCollection('expenses'),
+  creditNotesCollection: () => getCollection('creditNotes')
 };

@@ -10,6 +10,7 @@ const purchasesRouter = require('./api/purchases');
 const commissionAgentsRouter = require('./api/commissionAgents');
 const commissionHistoryRouter = require('./api/commissionHistory');
 const expensesRouter = require('./api/expenses');
+const creditNotesRouter = require('./api/creditNotes');
 
 // Basic routes
 router.get('/', (req, res) => {
@@ -32,4 +33,5 @@ router.use('/purchases', purchasesRouter);
 router.use('/commission-agents', commissionAgentsRouter);
 router.use('/commission-history', commissionHistoryRouter);
 router.use('/expenses', expensesRouter);
+router.use('/credit-notes', creditNotesRouter);
 module.exports = router;
