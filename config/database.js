@@ -36,6 +36,8 @@ const createDatabaseAndCollections = async (dbInstance) => {
       'products', 
       'invoices',
       'invoiceItems',
+      'deliveryNotes',
+      'deliveryNoteItems',
       'payments',
       'purchases',
       'purchaseItems',
@@ -75,6 +77,8 @@ const connectDB = async () => {
     collections.products = db.collection("products");
     collections.invoices = db.collection("invoices");
     collections.invoiceItems = db.collection("invoiceItems");
+    collections.deliveryNotes = db.collection("deliveryNotes");
+    collections.deliveryNoteItems = db.collection("deliveryNoteItems");
     collections.payments = db.collection("payments");
     collections.purchases = db.collection("purchases");
     collections.purchaseItems = db.collection("purchaseItems");
@@ -107,6 +111,8 @@ const getAssociatesCollection = () => getCollection('associates');
 const getProductsCollection = () => getCollection('products');
 const getInvoicesCollection = () => getCollection('invoices');
 const getInvoiceItemsCollection = () => getCollection('invoiceItems');
+const getDeliveryNotesCollection = () => getCollection('deliveryNotes');
+const getDeliveryNoteItemsCollection = () => getCollection('deliveryNoteItems');
 const getPaymentsCollection = () => getCollection('payments');
 const getPurchasesCollection = () => getCollection('purchases');
 const getPurchaseItemsCollection = () => getCollection('purchaseItems');
@@ -125,6 +131,8 @@ module.exports = {
   getProductsCollection,
   getInvoicesCollection,
   getInvoiceItemsCollection,
+  getDeliveryNotesCollection,
+  getDeliveryNoteItemsCollection,
   getPaymentsCollection,
   getPurchasesCollection,
   getPurchaseItemsCollection,
@@ -138,6 +146,8 @@ module.exports = {
   productsCollection: () => getCollection('products'),
   invoicesCollection: () => getCollection('invoices'),
   invoiceItemsCollection: () => getCollection('invoiceItems'),
+  deliveryNotesCollection: () => getCollection('deliveryNotes'),
+  deliveryNoteItemsCollection: () => getCollection('deliveryNoteItems'),
   paymentsCollection: () => getCollection('payments'),
   purchasesCollection: () => getCollection('purchases'),
   purchaseItemsCollection: () => getCollection('purchaseItems'),
