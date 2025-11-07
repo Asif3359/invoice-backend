@@ -1,5 +1,6 @@
 require('dotenv').config();
 const { MongoClient, ServerApiVersion } = require('mongodb');
+const mongoose = require('mongoose');
 
 // // MongoDB URI
 // const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.gdf4x.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -66,6 +67,7 @@ const createDatabaseAndCollections = async (dbInstance) => {
 // Connect and set collections
 const connectDB = async () => {
   try {
+    // Connect using native MongoDB driver (for existing code)
     await client.connect();
     db = client.db("invoiceApp");
     
@@ -88,7 +90,13 @@ const connectDB = async () => {
     collections.expenses = db.collection("expenses");
     collections.creditNotes = db.collection("creditNotes");
 
-    console.log("✅ Connected to MongoDB and collections initialized.");
+    // Connect using Mongoose (for new authentication system)
+    await mongoose.connect(uri, {
+      serverSelectionTimeoutMS: 5000,
+    });
+
+    console.log("✅ Connected to MongoDB (native driver) and collections initialized.");
+    console.log("✅ Connected to MongoDB (Mongoose) for authentication system.");
   } catch (error) {
     console.error("❌ Database connection error:", error);
     process.exit(1);

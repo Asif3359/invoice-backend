@@ -13,6 +13,10 @@ const expensesRouter = require('./api/expenses');
 const creditNotesRouter = require('./api/creditNotes');
 const deliveryNotesRouter = require('./api/deliveryNotes');
 
+// Authentication Routes
+const authRouter = require('./auth');
+const subUsersRouter = require('./subusers');
+
 // Basic routes
 router.get('/', (req, res) => {
   res.send({
@@ -24,6 +28,10 @@ router.get('/', (req, res) => {
 router.get('/test', (req, res) => {
   res.send('testing 🌍');
 });
+
+// Authentication routes
+router.use('/auth', authRouter);
+router.use('/sub-users', subUsersRouter);
 
 // API routes
 router.use('/associates', associatesRouter);
