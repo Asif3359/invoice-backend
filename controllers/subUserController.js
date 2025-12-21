@@ -1,6 +1,10 @@
-const { validationResult } = require('express-validator');
-const SubUser = require('../models/SubUser');
-const User = require('../models/User');
+const { validationResult } = require("express-validator");
+const SubUser = require("../models/SubUser");
+const User = require("../models/User");
+const {
+  getDefaultPermissionsForRole,
+  mergePermissions,
+} = require("../config/permissions");
 
 /**
  * Create a new sub-user
@@ -11,8 +15,8 @@ const createSubUser = async (req, res) => {
     if (!errors.isEmpty()) {
       return res.status(400).json({
         success: false,
-        message: 'Validation failed',
-        errors: errors.array()
+        message: "Validation failed",
+        errors: errors.array(),
       });
     }
 
@@ -20,16 +24,34 @@ const createSubUser = async (req, res) => {
     const parentUserId = req.userId; // From authenticate middleware
 
     // Check if email already exists
-    const existingSubUser = await SubUser.findOne({ email: email.toLowerCase() });
+    const existingSubUser = await SubUser.findOne({
+      email: email.toLowerCase(),
+    });
     if (existingSubUser) {
       return res.status(409).json({
         success: false,
-        message: 'Sub-user with this email already exists'
+        message: "Sub-user with this email already exists",
       });
     }
 
     // Hash password
     const passwordHash = await SubUser.hashPassword(password);
+
+    // Determine the role
+    const userRole = role || "viewer";
+
+    // Set permissions based on role
+    let finalPermissions;
+    if (userRole === "custom" && permissions) {
+      // For custom role, use provided permissions (or empty if not provided)
+      finalPermissions = permissions;
+    } else if (permissions && Object.keys(permissions).length > 0) {
+      // Merge custom permissions with role defaults
+      finalPermissions = mergePermissions(userRole, permissions);
+    } else {
+      // Use default permissions for the role
+      finalPermissions = getDefaultPermissionsForRole(userRole);
+    }
 
     // Create sub-user
     const subUser = new SubUser({
@@ -37,28 +59,28 @@ const createSubUser = async (req, res) => {
       email: email.toLowerCase(),
       passwordHash,
       fullName,
-      role: role || 'viewer',
-      permissions: permissions || {}
+      role: userRole,
+      permissions: finalPermissions,
     });
 
     await subUser.save();
-    await subUser.populate('parentUserId', 'email fullName');
+    await subUser.populate("parentUserId", "email fullName");
 
     res.status(201).json({
       success: true,
-      message: 'Sub-user created successfully',
+      message: "Sub-user created successfully",
       data: {
         subUser: {
           ...subUser.toJSON(),
-          parentUser: subUser.parentUserId
-        }
-      }
+          parentUser: subUser.parentUserId,
+        },
+      },
     });
   } catch (error) {
-    console.error('Create sub-user error:', error);
+    console.error("Create sub-user error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to create sub-user'
+      message: "Failed to create sub-user",
     });
   }
 };
@@ -71,23 +93,23 @@ const getSubUsers = async (req, res) => {
     const parentUserId = req.userId;
 
     const subUsers = await SubUser.find({ parentUserId })
-      .populate('parentUserId', 'email fullName')
+      .populate("parentUserId", "email fullName")
       .sort({ createdAt: -1 });
 
     res.json({
       success: true,
       data: {
-        subUsers: subUsers.map(subUser => ({
+        subUsers: subUsers.map((subUser) => ({
           ...subUser.toJSON(),
-          parentUser: subUser.parentUserId
-        }))
-      }
+          parentUser: subUser.parentUserId,
+        })),
+      },
     });
   } catch (error) {
-    console.error('Get sub-users error:', error);
+    console.error("Get sub-users error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to get sub-users'
+      message: "Failed to get sub-users",
     });
   }
 };
@@ -102,13 +124,13 @@ const getSubUserById = async (req, res) => {
 
     const subUser = await SubUser.findOne({
       _id: id,
-      parentUserId
-    }).populate('parentUserId', 'email fullName');
+      parentUserId,
+    }).populate("parentUserId", "email fullName");
 
     if (!subUser) {
       return res.status(404).json({
         success: false,
-        message: 'Sub-user not found'
+        message: "Sub-user not found",
       });
     }
 
@@ -117,15 +139,15 @@ const getSubUserById = async (req, res) => {
       data: {
         subUser: {
           ...subUser.toJSON(),
-          parentUser: subUser.parentUserId
-        }
-      }
+          parentUser: subUser.parentUserId,
+        },
+      },
     });
   } catch (error) {
-    console.error('Get sub-user error:', error);
+    console.error("Get sub-user error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to get sub-user'
+      message: "Failed to get sub-user",
     });
   }
 };
@@ -139,8 +161,8 @@ const updateSubUser = async (req, res) => {
     if (!errors.isEmpty()) {
       return res.status(400).json({
         success: false,
-        message: 'Validation failed',
-        errors: errors.array()
+        message: "Validation failed",
+        errors: errors.array(),
       });
     }
 
@@ -150,40 +172,83 @@ const updateSubUser = async (req, res) => {
 
     const subUser = await SubUser.findOne({
       _id: id,
-      parentUserId
+      parentUserId,
     });
 
     if (!subUser) {
       return res.status(404).json({
         success: false,
-        message: 'Sub-user not found'
+        message: "Sub-user not found",
       });
     }
 
     // Update fields
     if (fullName !== undefined) subUser.fullName = fullName;
-    if (role !== undefined) subUser.role = role;
-    if (permissions !== undefined) subUser.permissions = permissions;
     if (isActive !== undefined) subUser.isActive = isActive;
 
+    // Handle role and permissions update
+    if (role !== undefined) {
+      const oldRole = subUser.role;
+      subUser.role = role;
+
+      // If role changed, update permissions accordingly
+      if (oldRole !== role) {
+        if (role === "custom") {
+          // For custom role, keep existing permissions or use provided ones
+          if (permissions !== undefined) {
+            subUser.permissions = permissions;
+          }
+          // Otherwise keep existing permissions
+        } else {
+          // For predefined roles, get default permissions
+          if (
+            permissions !== undefined &&
+            Object.keys(permissions).length > 0
+          ) {
+            // Merge custom permissions with new role defaults
+            subUser.permissions = mergePermissions(role, permissions);
+          } else {
+            // Use default permissions for the new role
+            subUser.permissions = getDefaultPermissionsForRole(role);
+          }
+        }
+      } else if (permissions !== undefined) {
+        // Role didn't change, but permissions were provided
+        if (role === "custom") {
+          subUser.permissions = permissions;
+        } else {
+          // Merge with role defaults
+          subUser.permissions = mergePermissions(role, permissions);
+        }
+      }
+    } else if (permissions !== undefined) {
+      // Only permissions were provided, role stays the same
+      if (subUser.role === "custom") {
+        subUser.permissions = permissions;
+      } else {
+        // Merge with current role defaults
+        subUser.permissions = mergePermissions(subUser.role, permissions);
+      }
+    }
+
     await subUser.save();
-    await subUser.populate('parentUserId', 'email fullName');
+    await subUser.populate("parentUserId", "email fullName");
 
     res.json({
       success: true,
-      message: 'Sub-user updated successfully',
+      message: "Sub-user updated successfully",
       data: {
         subUser: {
           ...subUser.toJSON(),
-          parentUser: subUser.parentUserId
-        }
-      }
+          parentUser: subUser.parentUserId,
+        },
+      },
     });
   } catch (error) {
-    console.error('Update sub-user error:', error);
+    console.error("Update sub-user error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to update sub-user'
+      message: "Failed to update sub-user",
     });
   }
 };
@@ -197,8 +262,8 @@ const updateSubUserPassword = async (req, res) => {
     if (!errors.isEmpty()) {
       return res.status(400).json({
         success: false,
-        message: 'Validation failed',
-        errors: errors.array()
+        message: "Validation failed",
+        errors: errors.array(),
       });
     }
 
@@ -208,13 +273,13 @@ const updateSubUserPassword = async (req, res) => {
 
     const subUser = await SubUser.findOne({
       _id: id,
-      parentUserId
+      parentUserId,
     });
 
     if (!subUser) {
       return res.status(404).json({
         success: false,
-        message: 'Sub-user not found'
+        message: "Sub-user not found",
       });
     }
 
@@ -225,13 +290,13 @@ const updateSubUserPassword = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Sub-user password updated successfully'
+      message: "Sub-user password updated successfully",
     });
   } catch (error) {
-    console.error('Update sub-user password error:', error);
+    console.error("Update sub-user password error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to update sub-user password'
+      message: "Failed to update sub-user password",
     });
   }
 };
@@ -246,25 +311,54 @@ const deleteSubUser = async (req, res) => {
 
     const subUser = await SubUser.findOneAndDelete({
       _id: id,
-      parentUserId
+      parentUserId,
     });
 
     if (!subUser) {
       return res.status(404).json({
         success: false,
-        message: 'Sub-user not found'
+        message: "Sub-user not found",
       });
     }
 
     res.json({
       success: true,
-      message: 'Sub-user deleted successfully'
+      message: "Sub-user deleted successfully",
     });
   } catch (error) {
-    console.error('Delete sub-user error:', error);
+    console.error("Delete sub-user error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to delete sub-user'
+      message: "Failed to delete sub-user",
+    });
+  }
+};
+
+/**
+ * Get available permissions structure
+ * This endpoint helps frontend to build permission UI
+ */
+const getAvailablePermissions = async (req, res) => {
+  try {
+    const {
+      RESOURCES,
+      ACTIONS,
+      ROLE_PERMISSIONS,
+    } = require("../config/permissions");
+
+    res.json({
+      success: true,
+      data: {
+        resources: RESOURCES,
+        actions: ACTIONS,
+        rolePermissions: ROLE_PERMISSIONS,
+      },
+    });
+  } catch (error) {
+    console.error("Get available permissions error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to get available permissions",
     });
   }
 };
@@ -275,6 +369,6 @@ module.exports = {
   getSubUserById,
   updateSubUser,
   updateSubUserPassword,
-  deleteSubUser
+  deleteSubUser,
+  getAvailablePermissions,
 };
-
