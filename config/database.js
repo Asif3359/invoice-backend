@@ -1,6 +1,6 @@
-require('dotenv').config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
-const mongoose = require('mongoose');
+require("dotenv").config();
+const { MongoClient, ServerApiVersion } = require("mongodb");
+const mongoose = require("mongoose");
 
 // // MongoDB URI
 // const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.gdf4x.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -15,7 +15,7 @@ const client = new MongoClient(uri, {
     version: ServerApiVersion.v1,
     strict: true,
     deprecationErrors: true,
-  }
+  },
 });
 
 // Declare collections globally
@@ -27,28 +27,31 @@ const createDatabaseAndCollections = async (dbInstance) => {
   try {
     // List all collections to see what exists
     const existingCollections = await dbInstance.listCollections().toArray();
-    const existingCollectionNames = existingCollections.map(col => col.name);
-    
-    console.log('📋 Existing collections:', existingCollectionNames);
-    
+    const existingCollectionNames = existingCollections.map((col) => col.name);
+
+    console.log("📋 Existing collections:", existingCollectionNames);
+
     // Define required collections
     const requiredCollections = [
-      'associates',
-      'products', 
-      'invoices',
-      'invoiceItems',
-      'deliveryNotes',
-      'deliveryNoteItems',
-      'payments',
-      'purchases',
-      'purchaseItems',
-      'purchasePayments',
-      'commissionAgents',
-      'commissionHistory',
-      'expenses',
-      'creditNotes'
+      "associates",
+      "products",
+      "invoices",
+      "invoiceItems",
+      "deliveryNotes",
+      "deliveryNoteItems",
+      "payments",
+      "purchases",
+      "purchaseItems",
+      "purchasePayments",
+      "purchaseOrders",
+      "purchaseOrderItems",
+      "purchaseOrderPayments",
+      "commissionAgents",
+      "commissionHistory",
+      "expenses",
+      "creditNotes",
     ];
-    
+
     // Create collections that don't exist
     for (const collectionName of requiredCollections) {
       if (!existingCollectionNames.includes(collectionName)) {
@@ -56,10 +59,10 @@ const createDatabaseAndCollections = async (dbInstance) => {
         console.log(`✅ Created collection: ${collectionName}`);
       }
     }
-    
-    console.log('✅ Database and collections are ready!');
+
+    console.log("✅ Database and collections are ready!");
   } catch (error) {
-    console.error('❌ Error creating collections:', error);
+    console.error("❌ Error creating collections:", error);
     throw error;
   }
 };
@@ -70,10 +73,10 @@ const connectDB = async () => {
     // Connect using native MongoDB driver (for existing code)
     await client.connect();
     db = client.db("invoiceApp");
-    
+
     // Create database and collections if they don't exist
     await createDatabaseAndCollections(db);
-    
+
     // Initialize all collections
     collections.associates = db.collection("associates");
     collections.products = db.collection("products");
@@ -85,6 +88,9 @@ const connectDB = async () => {
     collections.purchases = db.collection("purchases");
     collections.purchaseItems = db.collection("purchaseItems");
     collections.purchasePayments = db.collection("purchasePayments");
+    collections.purchaseOrders = db.collection("purchaseOrders");
+    collections.purchaseOrderItems = db.collection("purchaseOrderItems");
+    collections.purchaseOrderPayments = db.collection("purchaseOrderPayments");
     collections.commissionAgents = db.collection("commissionAgents");
     collections.commissionHistory = db.collection("commissionHistory");
     collections.expenses = db.collection("expenses");
@@ -95,8 +101,12 @@ const connectDB = async () => {
       serverSelectionTimeoutMS: 5000,
     });
 
-    console.log("✅ Connected to MongoDB (native driver) and collections initialized.");
-    console.log("✅ Connected to MongoDB (Mongoose) for authentication system.");
+    console.log(
+      "✅ Connected to MongoDB (native driver) and collections initialized."
+    );
+    console.log(
+      "✅ Connected to MongoDB (Mongoose) for authentication system."
+    );
   } catch (error) {
     console.error("❌ Database connection error:", error);
     process.exit(1);
@@ -106,7 +116,7 @@ const connectDB = async () => {
 // Function to get collection by name
 const getCollection = (collectionName) => {
   if (!db) {
-    throw new Error('Database not connected. Call connectDB() first.');
+    throw new Error("Database not connected. Call connectDB() first.");
   }
   if (!collections[collectionName]) {
     throw new Error(`Collection '${collectionName}' not found.`);
@@ -115,20 +125,25 @@ const getCollection = (collectionName) => {
 };
 
 // Helper functions for each collection
-const getAssociatesCollection = () => getCollection('associates');
-const getProductsCollection = () => getCollection('products');
-const getInvoicesCollection = () => getCollection('invoices');
-const getInvoiceItemsCollection = () => getCollection('invoiceItems');
-const getDeliveryNotesCollection = () => getCollection('deliveryNotes');
-const getDeliveryNoteItemsCollection = () => getCollection('deliveryNoteItems');
-const getPaymentsCollection = () => getCollection('payments');
-const getPurchasesCollection = () => getCollection('purchases');
-const getPurchaseItemsCollection = () => getCollection('purchaseItems');
-const getPurchasePaymentsCollection = () => getCollection('purchasePayments');
-const getCommissionAgentsCollection = () => getCollection('commissionAgents');
-const getCommissionHistoryCollection = () => getCollection('commissionHistory');
-const getExpensesCollection = () => getCollection('expenses');
-const getCreditNotesCollection = () => getCollection('creditNotes');
+const getAssociatesCollection = () => getCollection("associates");
+const getProductsCollection = () => getCollection("products");
+const getInvoicesCollection = () => getCollection("invoices");
+const getInvoiceItemsCollection = () => getCollection("invoiceItems");
+const getDeliveryNotesCollection = () => getCollection("deliveryNotes");
+const getDeliveryNoteItemsCollection = () => getCollection("deliveryNoteItems");
+const getPaymentsCollection = () => getCollection("payments");
+const getPurchasesCollection = () => getCollection("purchases");
+const getPurchaseItemsCollection = () => getCollection("purchaseItems");
+const getPurchasePaymentsCollection = () => getCollection("purchasePayments");
+const getPurchaseOrdersCollection = () => getCollection("purchaseOrders");
+const getPurchaseOrderItemsCollection = () =>
+  getCollection("purchaseOrderItems");
+const getPurchaseOrderPaymentsCollection = () =>
+  getCollection("purchaseOrderPayments");
+const getCommissionAgentsCollection = () => getCollection("commissionAgents");
+const getCommissionHistoryCollection = () => getCollection("commissionHistory");
+const getExpensesCollection = () => getCollection("expenses");
+const getCreditNotesCollection = () => getCollection("creditNotes");
 
 module.exports = {
   connectDB,
@@ -145,23 +160,29 @@ module.exports = {
   getPurchasesCollection,
   getPurchaseItemsCollection,
   getPurchasePaymentsCollection,
+  getPurchaseOrdersCollection,
+  getPurchaseOrderItemsCollection,
+  getPurchaseOrderPaymentsCollection,
   getCommissionAgentsCollection,
   getCommissionHistoryCollection,
   getExpensesCollection,
   getCreditNotesCollection,
   // Legacy exports for backward compatibility
-  associatesCollection: () => getCollection('associates'),
-  productsCollection: () => getCollection('products'),
-  invoicesCollection: () => getCollection('invoices'),
-  invoiceItemsCollection: () => getCollection('invoiceItems'),
-  deliveryNotesCollection: () => getCollection('deliveryNotes'),
-  deliveryNoteItemsCollection: () => getCollection('deliveryNoteItems'),
-  paymentsCollection: () => getCollection('payments'),
-  purchasesCollection: () => getCollection('purchases'),
-  purchaseItemsCollection: () => getCollection('purchaseItems'),
-  purchasePaymentsCollection: () => getCollection('purchasePayments'),
-  commissionAgentsCollection: () => getCollection('commissionAgents'),
-  commissionHistoryCollection: () => getCollection('commissionHistory'),
-  expensesCollection: () => getCollection('expenses'),
-  creditNotesCollection: () => getCollection('creditNotes')
+  associatesCollection: () => getCollection("associates"),
+  productsCollection: () => getCollection("products"),
+  invoicesCollection: () => getCollection("invoices"),
+  invoiceItemsCollection: () => getCollection("invoiceItems"),
+  deliveryNotesCollection: () => getCollection("deliveryNotes"),
+  deliveryNoteItemsCollection: () => getCollection("deliveryNoteItems"),
+  paymentsCollection: () => getCollection("payments"),
+  purchasesCollection: () => getCollection("purchases"),
+  purchaseItemsCollection: () => getCollection("purchaseItems"),
+  purchasePaymentsCollection: () => getCollection("purchasePayments"),
+  purchaseOrdersCollection: () => getCollection("purchaseOrders"),
+  purchaseOrderItemsCollection: () => getCollection("purchaseOrderItems"),
+  purchaseOrderPaymentsCollection: () => getCollection("purchaseOrderPayments"),
+  commissionAgentsCollection: () => getCollection("commissionAgents"),
+  commissionHistoryCollection: () => getCollection("commissionHistory"),
+  expensesCollection: () => getCollection("expenses"),
+  creditNotesCollection: () => getCollection("creditNotes"),
 };
