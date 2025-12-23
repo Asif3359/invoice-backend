@@ -9,6 +9,7 @@ const RESOURCES = {
   PRODUCTS: "products",
   PAYMENTS: "payments",
   PURCHASES: "purchases",
+  PURCHASE_ORDERS: "purchaseOrders", // ✅ ADDED
   EXPENSES: "expenses",
   DELIVERY_NOTES: "deliveryNotes",
   CREDIT_NOTES: "creditNotes",
@@ -55,6 +56,14 @@ const FULL_PERMISSIONS = {
     [ACTIONS.EXPORT]: true,
   },
   [RESOURCES.PURCHASES]: {
+    [ACTIONS.CREATE]: true,
+    [ACTIONS.READ]: true,
+    [ACTIONS.UPDATE]: true,
+    [ACTIONS.DELETE]: true,
+    [ACTIONS.EXPORT]: true,
+  },
+  // ✅ ADDED PURCHASE ORDERS
+  [RESOURCES.PURCHASE_ORDERS]: {
     [ACTIONS.CREATE]: true,
     [ACTIONS.READ]: true,
     [ACTIONS.UPDATE]: true,
@@ -153,6 +162,14 @@ const ROLE_PERMISSIONS = {
       [ACTIONS.DELETE]: false,
       [ACTIONS.EXPORT]: true,
     },
+    // ✅ ADDED PURCHASE ORDERS FOR MANAGER
+    [RESOURCES.PURCHASE_ORDERS]: {
+      [ACTIONS.CREATE]: true,
+      [ACTIONS.READ]: true,
+      [ACTIONS.UPDATE]: true,
+      [ACTIONS.DELETE]: false,
+      [ACTIONS.EXPORT]: true,
+    },
     [RESOURCES.EXPENSES]: {
       [ACTIONS.CREATE]: true,
       [ACTIONS.READ]: true,
@@ -241,6 +258,14 @@ const ROLE_PERMISSIONS = {
       [ACTIONS.DELETE]: false,
       [ACTIONS.EXPORT]: true,
     },
+    // ✅ ADDED PURCHASE ORDERS FOR ACCOUNTANT
+    [RESOURCES.PURCHASE_ORDERS]: {
+      [ACTIONS.CREATE]: true,
+      [ACTIONS.READ]: true,
+      [ACTIONS.UPDATE]: true,
+      [ACTIONS.DELETE]: false,
+      [ACTIONS.EXPORT]: true,
+    },
     [RESOURCES.EXPENSES]: {
       [ACTIONS.CREATE]: true,
       [ACTIONS.READ]: true,
@@ -323,6 +348,14 @@ const ROLE_PERMISSIONS = {
       [ACTIONS.EXPORT]: true,
     },
     [RESOURCES.PURCHASES]: {
+      [ACTIONS.CREATE]: false,
+      [ACTIONS.READ]: true,
+      [ACTIONS.UPDATE]: false,
+      [ACTIONS.DELETE]: false,
+      [ACTIONS.EXPORT]: true,
+    },
+    // ✅ ADDED PURCHASE ORDERS FOR VIEWER
+    [RESOURCES.PURCHASE_ORDERS]: {
       [ACTIONS.CREATE]: false,
       [ACTIONS.READ]: true,
       [ACTIONS.UPDATE]: false,
