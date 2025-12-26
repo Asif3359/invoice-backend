@@ -5,9 +5,10 @@ const mongoose = require("mongoose");
 // // MongoDB URI
 // const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.gdf4x.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
-// const uri = process.env.MONGO_URI;
 // MongoDB URI
-const uri = `mongodb://localhost:27017/invoiceApp`;
+const uri = process.env.MONGO_URI;
+// MongoDB URI
+// const uri = `mongodb://localhost:27017/invoiceApp`;
 
 // MongoDB Client
 const client = new MongoClient(uri, {
