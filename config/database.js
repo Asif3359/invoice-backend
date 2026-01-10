@@ -51,6 +51,11 @@ const createDatabaseAndCollections = async (dbInstance) => {
       "commissionHistory",
       "expenses",
       "creditNotes",
+      "warehouses",
+      "warehouseItems",
+      "inventory",
+      "physicalStockTake",
+      "stockTransferHistory",
     ];
 
     // Create collections that don't exist
@@ -96,6 +101,11 @@ const connectDB = async () => {
     collections.commissionHistory = db.collection("commissionHistory");
     collections.expenses = db.collection("expenses");
     collections.creditNotes = db.collection("creditNotes");
+    collections.warehouses = db.collection("warehouses");
+    collections.warehouseItems = db.collection("warehouseItems");
+    collections.inventory = db.collection("inventory");
+    collections.physicalStockTake = db.collection("physicalStockTake");
+    collections.stockTransferHistory = db.collection("stockTransferHistory");
 
     // Connect using Mongoose (for new authentication system)
     await mongoose.connect(uri, {
@@ -145,6 +155,11 @@ const getCommissionAgentsCollection = () => getCollection("commissionAgents");
 const getCommissionHistoryCollection = () => getCollection("commissionHistory");
 const getExpensesCollection = () => getCollection("expenses");
 const getCreditNotesCollection = () => getCollection("creditNotes");
+const getWarehousesCollection = () => getCollection("warehouses");
+const getWarehouseItemsCollection = () => getCollection("warehouseItems");
+const getInventoryCollection = () => getCollection("inventory");
+const getPhysicalStockTakeCollection = () => getCollection("physicalStockTake");
+const getStockTransferHistoryCollection = () => getCollection("stockTransferHistory");
 
 module.exports = {
   connectDB,
@@ -168,6 +183,11 @@ module.exports = {
   getCommissionHistoryCollection,
   getExpensesCollection,
   getCreditNotesCollection,
+  getWarehousesCollection,
+  getWarehouseItemsCollection,
+  getInventoryCollection,
+  getPhysicalStockTakeCollection,
+  getStockTransferHistoryCollection,
   // Legacy exports for backward compatibility
   associatesCollection: () => getCollection("associates"),
   productsCollection: () => getCollection("products"),
@@ -186,4 +206,9 @@ module.exports = {
   commissionHistoryCollection: () => getCollection("commissionHistory"),
   expensesCollection: () => getCollection("expenses"),
   creditNotesCollection: () => getCollection("creditNotes"),
+  warehousesCollection: () => getCollection("warehouses"),
+  warehouseItemsCollection: () => getCollection("warehouseItems"),
+  inventoryCollection: () => getCollection("inventory"),
+  physicalStockTakeCollection: () => getCollection("physicalStockTake"),
+  stockTransferHistoryCollection: () => getCollection("stockTransferHistory"),
 };

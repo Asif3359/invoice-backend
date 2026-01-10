@@ -13,6 +13,10 @@ const commissionHistoryRouter = require("./api/commissionHistory");
 const expensesRouter = require("./api/expenses");
 const creditNotesRouter = require("./api/creditNotes");
 const deliveryNotesRouter = require("./api/deliveryNotes");
+const warehousesRouter = require("./api/warehouses");
+const inventoryRouter = require("./api/inventory");
+const physicalStockTakeRouter = require("./api/physicalStockTake");
+const stockTransfersRouter = require("./api/stockTransfers");
 
 // Authentication Routes
 const authRouter = require("./auth");
@@ -46,4 +50,9 @@ router.use("/commission-history", commissionHistoryRouter);
 router.use("/expenses", expensesRouter);
 router.use("/credit-notes", creditNotesRouter);
 router.use("/delivery-notes", deliveryNotesRouter);
+router.use("/warehouses", warehousesRouter);
+router.use("/inventory", inventoryRouter);
+router.use("/physical-stock-take", physicalStockTakeRouter);
+router.use("/stock-transfers", stockTransfersRouter);
+
 module.exports = router;
