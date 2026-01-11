@@ -9,13 +9,17 @@ const RESOURCES = {
   PRODUCTS: "products",
   PAYMENTS: "payments",
   PURCHASES: "purchases",
-  PURCHASE_ORDERS: "purchaseOrders", // ✅ ADDED
+  PURCHASE_ORDERS: "purchaseOrders",
   EXPENSES: "expenses",
   DELIVERY_NOTES: "deliveryNotes",
   CREDIT_NOTES: "creditNotes",
   ASSOCIATES: "associates",
   COMMISSION_AGENTS: "commissionAgents",
   COMMISSION_HISTORY: "commissionHistory",
+  INVENTORY: "inventory", // ✅ NEW
+  WAREHOUSES: "warehouses", // ✅ NEW
+  STOCK_TRANSFERS: "stockTransfers", // ✅ NEW
+  PHYSICAL_STOCK_TAKE: "physicalStockTake", // ✅ NEW
   SUB_USERS: "subUsers",
   REPORTS: "reports",
   SETTINGS: "settings",
@@ -62,7 +66,6 @@ const FULL_PERMISSIONS = {
     [ACTIONS.DELETE]: true,
     [ACTIONS.EXPORT]: true,
   },
-  // ✅ ADDED PURCHASE ORDERS
   [RESOURCES.PURCHASE_ORDERS]: {
     [ACTIONS.CREATE]: true,
     [ACTIONS.READ]: true,
@@ -106,6 +109,34 @@ const FULL_PERMISSIONS = {
     [ACTIONS.EXPORT]: true,
   },
   [RESOURCES.COMMISSION_HISTORY]: {
+    [ACTIONS.CREATE]: true,
+    [ACTIONS.READ]: true,
+    [ACTIONS.UPDATE]: true,
+    [ACTIONS.DELETE]: true,
+    [ACTIONS.EXPORT]: true,
+  },
+  [RESOURCES.INVENTORY]: {
+    [ACTIONS.CREATE]: true,
+    [ACTIONS.READ]: true,
+    [ACTIONS.UPDATE]: true,
+    [ACTIONS.DELETE]: true,
+    [ACTIONS.EXPORT]: true,
+  },
+  [RESOURCES.WAREHOUSES]: {
+    [ACTIONS.CREATE]: true,
+    [ACTIONS.READ]: true,
+    [ACTIONS.UPDATE]: true,
+    [ACTIONS.DELETE]: true,
+    [ACTIONS.EXPORT]: true,
+  },
+  [RESOURCES.STOCK_TRANSFERS]: {
+    [ACTIONS.CREATE]: true,
+    [ACTIONS.READ]: true,
+    [ACTIONS.UPDATE]: true,
+    [ACTIONS.DELETE]: true,
+    [ACTIONS.EXPORT]: true,
+  },
+  [RESOURCES.PHYSICAL_STOCK_TAKE]: {
     [ACTIONS.CREATE]: true,
     [ACTIONS.READ]: true,
     [ACTIONS.UPDATE]: true,
@@ -162,7 +193,6 @@ const ROLE_PERMISSIONS = {
       [ACTIONS.DELETE]: false,
       [ACTIONS.EXPORT]: true,
     },
-    // ✅ ADDED PURCHASE ORDERS FOR MANAGER
     [RESOURCES.PURCHASE_ORDERS]: {
       [ACTIONS.CREATE]: true,
       [ACTIONS.READ]: true,
@@ -209,6 +239,34 @@ const ROLE_PERMISSIONS = {
       [ACTIONS.CREATE]: false,
       [ACTIONS.READ]: true,
       [ACTIONS.UPDATE]: false,
+      [ACTIONS.DELETE]: false,
+      [ACTIONS.EXPORT]: true,
+    },
+    [RESOURCES.INVENTORY]: {
+      [ACTIONS.CREATE]: true,
+      [ACTIONS.READ]: true,
+      [ACTIONS.UPDATE]: true,
+      [ACTIONS.DELETE]: false,
+      [ACTIONS.EXPORT]: true,
+    },
+    [RESOURCES.WAREHOUSES]: {
+      [ACTIONS.CREATE]: true,
+      [ACTIONS.READ]: true,
+      [ACTIONS.UPDATE]: true,
+      [ACTIONS.DELETE]: false,
+      [ACTIONS.EXPORT]: true,
+    },
+    [RESOURCES.STOCK_TRANSFERS]: {
+      [ACTIONS.CREATE]: true,
+      [ACTIONS.READ]: true,
+      [ACTIONS.UPDATE]: true,
+      [ACTIONS.DELETE]: false,
+      [ACTIONS.EXPORT]: true,
+    },
+    [RESOURCES.PHYSICAL_STOCK_TAKE]: {
+      [ACTIONS.CREATE]: true,
+      [ACTIONS.READ]: true,
+      [ACTIONS.UPDATE]: true,
       [ACTIONS.DELETE]: false,
       [ACTIONS.EXPORT]: true,
     },
@@ -258,7 +316,6 @@ const ROLE_PERMISSIONS = {
       [ACTIONS.DELETE]: false,
       [ACTIONS.EXPORT]: true,
     },
-    // ✅ ADDED PURCHASE ORDERS FOR ACCOUNTANT
     [RESOURCES.PURCHASE_ORDERS]: {
       [ACTIONS.CREATE]: true,
       [ACTIONS.READ]: true,
@@ -302,6 +359,34 @@ const ROLE_PERMISSIONS = {
       [ACTIONS.EXPORT]: true,
     },
     [RESOURCES.COMMISSION_HISTORY]: {
+      [ACTIONS.CREATE]: false,
+      [ACTIONS.READ]: true,
+      [ACTIONS.UPDATE]: false,
+      [ACTIONS.DELETE]: false,
+      [ACTIONS.EXPORT]: true,
+    },
+    [RESOURCES.INVENTORY]: {
+      [ACTIONS.CREATE]: false,
+      [ACTIONS.READ]: true,
+      [ACTIONS.UPDATE]: false,
+      [ACTIONS.DELETE]: false,
+      [ACTIONS.EXPORT]: true,
+    },
+    [RESOURCES.WAREHOUSES]: {
+      [ACTIONS.CREATE]: false,
+      [ACTIONS.READ]: true,
+      [ACTIONS.UPDATE]: false,
+      [ACTIONS.DELETE]: false,
+      [ACTIONS.EXPORT]: true,
+    },
+    [RESOURCES.STOCK_TRANSFERS]: {
+      [ACTIONS.CREATE]: false,
+      [ACTIONS.READ]: true,
+      [ACTIONS.UPDATE]: false,
+      [ACTIONS.DELETE]: false,
+      [ACTIONS.EXPORT]: true,
+    },
+    [RESOURCES.PHYSICAL_STOCK_TAKE]: {
       [ACTIONS.CREATE]: false,
       [ACTIONS.READ]: true,
       [ACTIONS.UPDATE]: false,
@@ -354,7 +439,6 @@ const ROLE_PERMISSIONS = {
       [ACTIONS.DELETE]: false,
       [ACTIONS.EXPORT]: true,
     },
-    // ✅ ADDED PURCHASE ORDERS FOR VIEWER
     [RESOURCES.PURCHASE_ORDERS]: {
       [ACTIONS.CREATE]: false,
       [ACTIONS.READ]: true,
@@ -398,6 +482,34 @@ const ROLE_PERMISSIONS = {
       [ACTIONS.EXPORT]: false,
     },
     [RESOURCES.COMMISSION_HISTORY]: {
+      [ACTIONS.CREATE]: false,
+      [ACTIONS.READ]: true,
+      [ACTIONS.UPDATE]: false,
+      [ACTIONS.DELETE]: false,
+      [ACTIONS.EXPORT]: false,
+    },
+    [RESOURCES.INVENTORY]: {
+      [ACTIONS.CREATE]: false,
+      [ACTIONS.READ]: true,
+      [ACTIONS.UPDATE]: false,
+      [ACTIONS.DELETE]: false,
+      [ACTIONS.EXPORT]: false,
+    },
+    [RESOURCES.WAREHOUSES]: {
+      [ACTIONS.CREATE]: false,
+      [ACTIONS.READ]: true,
+      [ACTIONS.UPDATE]: false,
+      [ACTIONS.DELETE]: false,
+      [ACTIONS.EXPORT]: false,
+    },
+    [RESOURCES.STOCK_TRANSFERS]: {
+      [ACTIONS.CREATE]: false,
+      [ACTIONS.READ]: true,
+      [ACTIONS.UPDATE]: false,
+      [ACTIONS.DELETE]: false,
+      [ACTIONS.EXPORT]: false,
+    },
+    [RESOURCES.PHYSICAL_STOCK_TAKE]: {
       [ACTIONS.CREATE]: false,
       [ACTIONS.READ]: true,
       [ACTIONS.UPDATE]: false,
