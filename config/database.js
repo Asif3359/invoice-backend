@@ -56,6 +56,7 @@ const createDatabaseAndCollections = async (dbInstance) => {
       "inventory",
       "physicalStockTake",
       "stockTransferHistory",
+      "cashRegisters",
     ];
 
     // Create collections that don't exist
@@ -106,6 +107,7 @@ const connectDB = async () => {
     collections.inventory = db.collection("inventory");
     collections.physicalStockTake = db.collection("physicalStockTake");
     collections.stockTransferHistory = db.collection("stockTransferHistory");
+    collections.cashRegisters = db.collection("cashRegisters");
 
     // Connect using Mongoose (for new authentication system)
     await mongoose.connect(uri, {
@@ -159,7 +161,9 @@ const getWarehousesCollection = () => getCollection("warehouses");
 const getWarehouseItemsCollection = () => getCollection("warehouseItems");
 const getInventoryCollection = () => getCollection("inventory");
 const getPhysicalStockTakeCollection = () => getCollection("physicalStockTake");
-const getStockTransferHistoryCollection = () => getCollection("stockTransferHistory");
+const getStockTransferHistoryCollection = () =>
+  getCollection("stockTransferHistory");
+const getCashRegistersCollection = () => getCollection("cashRegisters");
 
 module.exports = {
   connectDB,
@@ -188,6 +192,7 @@ module.exports = {
   getInventoryCollection,
   getPhysicalStockTakeCollection,
   getStockTransferHistoryCollection,
+  getCashRegistersCollection,
   // Legacy exports for backward compatibility
   associatesCollection: () => getCollection("associates"),
   productsCollection: () => getCollection("products"),
@@ -211,4 +216,5 @@ module.exports = {
   inventoryCollection: () => getCollection("inventory"),
   physicalStockTakeCollection: () => getCollection("physicalStockTake"),
   stockTransferHistoryCollection: () => getCollection("stockTransferHistory"),
+  cashRegistersCollection: () => getCollection("cashRegisters"),
 };

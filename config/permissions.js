@@ -16,10 +16,11 @@ const RESOURCES = {
   ASSOCIATES: "associates",
   COMMISSION_AGENTS: "commissionAgents",
   COMMISSION_HISTORY: "commissionHistory",
-  INVENTORY: "inventory", // ✅ NEW
-  WAREHOUSES: "warehouses", // ✅ NEW
-  STOCK_TRANSFERS: "stockTransfers", // ✅ NEW
-  PHYSICAL_STOCK_TAKE: "physicalStockTake", // ✅ NEW
+  INVENTORY: "inventory",
+  WAREHOUSES: "warehouses",
+  STOCK_TRANSFERS: "stockTransfers",
+  PHYSICAL_STOCK_TAKE: "physicalStockTake",
+  CASH_REGISTERS: "cashRegisters", // ✅ NEW
   SUB_USERS: "subUsers",
   REPORTS: "reports",
   SETTINGS: "settings",
@@ -137,6 +138,13 @@ const FULL_PERMISSIONS = {
     [ACTIONS.EXPORT]: true,
   },
   [RESOURCES.PHYSICAL_STOCK_TAKE]: {
+    [ACTIONS.CREATE]: true,
+    [ACTIONS.READ]: true,
+    [ACTIONS.UPDATE]: true,
+    [ACTIONS.DELETE]: true,
+    [ACTIONS.EXPORT]: true,
+  },
+  [RESOURCES.CASH_REGISTERS]: {
     [ACTIONS.CREATE]: true,
     [ACTIONS.READ]: true,
     [ACTIONS.UPDATE]: true,
@@ -270,6 +278,13 @@ const ROLE_PERMISSIONS = {
       [ACTIONS.DELETE]: false,
       [ACTIONS.EXPORT]: true,
     },
+    [RESOURCES.CASH_REGISTERS]: {
+      [ACTIONS.CREATE]: true,
+      [ACTIONS.READ]: true,
+      [ACTIONS.UPDATE]: true,
+      [ACTIONS.DELETE]: false,
+      [ACTIONS.EXPORT]: true,
+    },
     [RESOURCES.SUB_USERS]: {
       [ACTIONS.CREATE]: false,
       [ACTIONS.READ]: true,
@@ -393,6 +408,13 @@ const ROLE_PERMISSIONS = {
       [ACTIONS.DELETE]: false,
       [ACTIONS.EXPORT]: true,
     },
+    [RESOURCES.CASH_REGISTERS]: {
+      [ACTIONS.CREATE]: true,
+      [ACTIONS.READ]: true,
+      [ACTIONS.UPDATE]: true,
+      [ACTIONS.DELETE]: false,
+      [ACTIONS.EXPORT]: true,
+    },
     [RESOURCES.SUB_USERS]: {
       [ACTIONS.CREATE]: false,
       [ACTIONS.READ]: false,
@@ -510,6 +532,13 @@ const ROLE_PERMISSIONS = {
       [ACTIONS.EXPORT]: false,
     },
     [RESOURCES.PHYSICAL_STOCK_TAKE]: {
+      [ACTIONS.CREATE]: false,
+      [ACTIONS.READ]: true,
+      [ACTIONS.UPDATE]: false,
+      [ACTIONS.DELETE]: false,
+      [ACTIONS.EXPORT]: false,
+    },
+    [RESOURCES.CASH_REGISTERS]: {
       [ACTIONS.CREATE]: false,
       [ACTIONS.READ]: true,
       [ACTIONS.UPDATE]: false,

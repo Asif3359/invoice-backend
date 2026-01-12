@@ -17,6 +17,7 @@ const warehousesRouter = require("./api/warehouses");
 const inventoryRouter = require("./api/inventory");
 const physicalStockTakeRouter = require("./api/physicalStockTake");
 const stockTransfersRouter = require("./api/stockTransfers");
+const cashRegistersRouter = require("./api/cashRegisters");
 
 // Authentication Routes
 const authRouter = require("./auth");
@@ -54,5 +55,6 @@ router.use("/warehouses", warehousesRouter);
 router.use("/inventory", inventoryRouter);
 router.use("/physical-stock-take", physicalStockTakeRouter);
 router.use("/stock-transfers", stockTransfersRouter);
+router.use("/cash-registers", cashRegistersRouter);
 
 module.exports = router;
