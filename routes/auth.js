@@ -68,6 +68,12 @@ const passwordResetValidation = [
     .withMessage('User type must be either "main" or "sub"')
 ];
 
+const emailVerificationValidation = [
+  body('token')
+    .notEmpty()
+    .withMessage('Verification token is required')
+];
+
 // Routes
 router.post('/register', authLimiter, registerValidation, authController.register);
 router.post('/login', authLimiter, loginValidation, authController.login);
@@ -76,7 +82,9 @@ router.post('/logout', authController.logout);
 router.get('/profile', authenticate, authController.getProfile);
 router.post('/password-reset/request', passwordResetLimiter, passwordResetRequestValidation, authController.requestPasswordReset);
 router.post('/password-reset', passwordResetLimiter, passwordResetValidation, authController.resetPassword);
+// Email verification - supports both GET (web) and POST (mobile)
 router.get('/verify-email/:token', authController.verifyEmail);
+router.post('/verify-email', emailVerificationValidation, authController.verifyEmail);
 
 module.exports = router;
 

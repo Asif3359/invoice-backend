@@ -1,9 +1,16 @@
-const { validationResult } = require('express-validator');
-const User = require('../models/User');
-const SubUser = require('../models/SubUser');
-const Session = require('../models/Session');
-const { generateTokenPair, verifyRefreshToken } = require('../utils/tokenGenerator');
-const crypto = require('crypto');
+const { validationResult } = require("express-validator");
+const User = require("../models/User");
+const SubUser = require("../models/SubUser");
+const Session = require("../models/Session");
+const {
+  generateTokenPair,
+  verifyRefreshToken,
+} = require("../utils/tokenGenerator");
+const {
+  sendVerificationEmail,
+  sendPasswordResetEmail,
+} = require("../utils/emailService");
+const crypto = require("crypto");
 
 /**
  * Register a new main user
@@ -13,11 +20,11 @@ const register = async (req, res) => {
     // Check validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      console.log('Validation errors:', errors.array());
+      console.log("Validation errors:", errors.array());
       return res.status(400).json({
         success: false,
-        message: 'Validation failed',
-        errors: errors.array()
+        message: "Validation failed",
+        errors: errors.array(),
       });
     }
 
@@ -28,7 +35,7 @@ const register = async (req, res) => {
     if (existingUser) {
       return res.status(409).json({
         success: false,
-        message: 'User with this email already exists'
+        message: "User with this email already exists",
       });
     }
 
@@ -36,7 +43,7 @@ const register = async (req, res) => {
     const passwordHash = await User.hashPassword(password);
 
     // Generate verification token
-    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const verificationToken = crypto.randomBytes(32).toString("hex");
 
     // Create user
     const user = new User({
@@ -44,7 +51,7 @@ const register = async (req, res) => {
       passwordHash,
       fullName,
       phone,
-      verificationToken
+      verificationToken,
     });
 
     await user.save();
@@ -53,7 +60,7 @@ const register = async (req, res) => {
     const tokenPayload = {
       userId: user._id.toString(),
       email: user.email,
-      userType: 'main'
+      userType: "main",
     };
     const { accessToken, refreshToken } = generateTokenPair(tokenPayload);
 
@@ -63,37 +70,43 @@ const register = async (req, res) => {
 
     const session = new Session({
       userId: user._id,
-      userType: 'main',
+      userType: "main",
       refreshToken,
       deviceInfo: req.body.deviceInfo || {},
       ipAddress: req.ip,
-      expiresAt
+      expiresAt,
     });
     await session.save();
 
-    // TODO: Send verification email
+    // Send verification email
+    try {
+      await sendVerificationEmail(user.email, verificationToken, user.fullName);
+    } catch (emailError) {
+      console.error("Failed to send verification email:", emailError);
+      // Don't fail registration if email fails
+    }
 
     res.status(201).json({
       success: true,
-      message: 'User registered successfully. Please verify your email.',
+      message: "User registered successfully. Please verify your email.",
       data: {
         user: {
           id: user._id,
           email: user.email,
           fullName: user.fullName,
-          emailVerified: user.emailVerified
+          emailVerified: user.emailVerified,
         },
         tokens: {
           accessToken,
-          refreshToken
-        }
-      }
+          refreshToken,
+        },
+      },
     });
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error("Registration error:", error);
     res.status(500).json({
       success: false,
-      message: 'Registration failed. Please try again.'
+      message: "Registration failed. Please try again.",
     });
   }
 };
@@ -108,21 +121,24 @@ const login = async (req, res) => {
     if (!errors.isEmpty()) {
       return res.status(400).json({
         success: false,
-        message: 'Validation failed',
-        errors: errors.array()
+        message: "Validation failed",
+        errors: errors.array(),
       });
     }
 
-    const { email, password, userType = 'main' } = req.body;
+    const { email, password, userType = "main" } = req.body;
 
     // Find user based on type
     let user;
-    if (userType === 'sub') {
-      user = await SubUser.findOne({ email: email.toLowerCase() }).populate('parentUserId', 'email fullName');
+    if (userType === "sub") {
+      user = await SubUser.findOne({ email: email.toLowerCase() }).populate(
+        "parentUserId",
+        "email fullName"
+      );
       if (!user) {
         return res.status(401).json({
           success: false,
-          message: 'Invalid email or password'
+          message: "Invalid email or password",
         });
       }
     } else {
@@ -130,7 +146,7 @@ const login = async (req, res) => {
       if (!user) {
         return res.status(401).json({
           success: false,
-          message: 'Invalid email or password'
+          message: "Invalid email or password",
         });
       }
     }
@@ -139,7 +155,7 @@ const login = async (req, res) => {
     if (!user.isActive) {
       return res.status(403).json({
         success: false,
-        message: 'Account is deactivated. Please contact administrator.'
+        message: "Account is deactivated. Please contact administrator.",
       });
     }
 
@@ -148,7 +164,7 @@ const login = async (req, res) => {
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password'
+        message: "Invalid email or password",
       });
     }
 
@@ -156,7 +172,7 @@ const login = async (req, res) => {
     const tokenPayload = {
       userId: user._id.toString(),
       email: user.email,
-      userType: userType
+      userType: userType,
     };
     const { accessToken, refreshToken } = generateTokenPair(tokenPayload);
 
@@ -170,28 +186,29 @@ const login = async (req, res) => {
       refreshToken,
       deviceInfo: req.body.deviceInfo || {},
       ipAddress: req.ip,
-      expiresAt
+      expiresAt,
     });
     await session.save();
 
     res.json({
       success: true,
-      message: 'Login successful',
+      message: "Login successful",
       data: {
-        user: userType === 'sub' 
-          ? { ...user.toJSON(), parentUser: user.parentUserId }
-          : user.toJSON(),
+        user:
+          userType === "sub"
+            ? { ...user.toJSON(), parentUser: user.parentUserId }
+            : user.toJSON(),
         tokens: {
           accessToken,
-          refreshToken
-        }
-      }
+          refreshToken,
+        },
+      },
     });
   } catch (error) {
-    console.error('Login error:', error);
+    console.error("Login error:", error);
     res.status(500).json({
       success: false,
-      message: 'Login failed. Please try again.'
+      message: "Login failed. Please try again.",
     });
   }
 };
@@ -206,7 +223,7 @@ const refreshToken = async (req, res) => {
     if (!token) {
       return res.status(400).json({
         success: false,
-        message: 'Refresh token is required'
+        message: "Refresh token is required",
       });
     }
 
@@ -217,7 +234,7 @@ const refreshToken = async (req, res) => {
     } catch (error) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid or expired refresh token'
+        message: "Invalid or expired refresh token",
       });
     }
 
@@ -226,13 +243,13 @@ const refreshToken = async (req, res) => {
     if (!session || session.expiresAt < new Date()) {
       return res.status(401).json({
         success: false,
-        message: 'Session expired. Please login again.'
+        message: "Session expired. Please login again.",
       });
     }
 
     // Verify user still exists and is active
     let user;
-    if (decoded.userType === 'sub') {
+    if (decoded.userType === "sub") {
       user = await SubUser.findById(decoded.userId);
     } else {
       user = await User.findById(decoded.userId);
@@ -243,7 +260,7 @@ const refreshToken = async (req, res) => {
       await Session.deleteOne({ refreshToken: token });
       return res.status(401).json({
         success: false,
-        message: 'User not found or inactive'
+        message: "User not found or inactive",
       });
     }
 
@@ -251,21 +268,21 @@ const refreshToken = async (req, res) => {
     const tokenPayload = {
       userId: user._id.toString(),
       email: user.email,
-      userType: decoded.userType
+      userType: decoded.userType,
     };
     const { accessToken } = generateTokenPair(tokenPayload);
 
     res.json({
       success: true,
       data: {
-        accessToken
-      }
+        accessToken,
+      },
     });
   } catch (error) {
-    console.error('Refresh token error:', error);
+    console.error("Refresh token error:", error);
     res.status(500).json({
       success: false,
-      message: 'Token refresh failed'
+      message: "Token refresh failed",
     });
   }
 };
@@ -283,13 +300,13 @@ const logout = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Logged out successfully'
+      message: "Logged out successfully",
     });
   } catch (error) {
-    console.error('Logout error:', error);
+    console.error("Logout error:", error);
     res.status(500).json({
       success: false,
-      message: 'Logout failed'
+      message: "Logout failed",
     });
   }
 };
@@ -300,8 +317,11 @@ const logout = async (req, res) => {
 const getProfile = async (req, res) => {
   try {
     let user;
-    if (req.userType === 'sub') {
-      user = await SubUser.findById(req.userId).populate('parentUserId', 'email fullName');
+    if (req.userType === "sub") {
+      user = await SubUser.findById(req.userId).populate(
+        "parentUserId",
+        "email fullName"
+      );
     } else {
       user = await User.findById(req.userId);
     }
@@ -309,23 +329,24 @@ const getProfile = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found'
+        message: "User not found",
       });
     }
 
     res.json({
       success: true,
       data: {
-        user: req.userType === 'sub' 
-          ? { ...user.toJSON(), parentUser: user.parentUserId }
-          : user.toJSON()
-      }
+        user:
+          req.userType === "sub"
+            ? { ...user.toJSON(), parentUser: user.parentUserId }
+            : user.toJSON(),
+      },
     });
   } catch (error) {
-    console.error('Get profile error:', error);
+    console.error("Get profile error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to get profile'
+      message: "Failed to get profile",
     });
   }
 };
@@ -339,15 +360,15 @@ const requestPasswordReset = async (req, res) => {
     if (!errors.isEmpty()) {
       return res.status(400).json({
         success: false,
-        message: 'Validation failed',
-        errors: errors.array()
+        message: "Validation failed",
+        errors: errors.array(),
       });
     }
 
-    const { email, userType = 'main' } = req.body;
+    const { email, userType = "main" } = req.body;
 
     let user;
-    if (userType === 'sub') {
+    if (userType === "sub") {
       user = await SubUser.findOne({ email: email.toLowerCase() });
     } else {
       user = await User.findOne({ email: email.toLowerCase() });
@@ -357,12 +378,12 @@ const requestPasswordReset = async (req, res) => {
       // Don't reveal if user exists or not
       return res.json({
         success: true,
-        message: 'If the email exists, a password reset link has been sent.'
+        message: "If the email exists, a password reset link has been sent.",
       });
     }
 
     // Generate reset token
-    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetToken = crypto.randomBytes(32).toString("hex");
     const resetTokenExpires = new Date();
     resetTokenExpires.setHours(resetTokenExpires.getHours() + 1); // 1 hour
 
@@ -370,17 +391,27 @@ const requestPasswordReset = async (req, res) => {
     user.resetTokenExpires = resetTokenExpires;
     await user.save();
 
-    // TODO: Send password reset email
+    // Send password reset email
+    try {
+      await sendPasswordResetEmail(
+        user.email,
+        resetToken,
+        user.fullName || user.name
+      );
+    } catch (emailError) {
+      console.error("Failed to send password reset email:", emailError);
+      // Don't reveal if email failed for security
+    }
 
     res.json({
       success: true,
-      message: 'If the email exists, a password reset link has been sent.'
+      message: "If the email exists, a password reset link has been sent.",
     });
   } catch (error) {
-    console.error('Password reset request error:', error);
+    console.error("Password reset request error:", error);
     res.status(500).json({
       success: false,
-      message: 'Password reset request failed'
+      message: "Password reset request failed",
     });
   }
 };
@@ -394,30 +425,30 @@ const resetPassword = async (req, res) => {
     if (!errors.isEmpty()) {
       return res.status(400).json({
         success: false,
-        message: 'Validation failed',
-        errors: errors.array()
+        message: "Validation failed",
+        errors: errors.array(),
       });
     }
 
-    const { token, password, userType = 'main' } = req.body;
+    const { token, password, userType = "main" } = req.body;
 
     let user;
-    if (userType === 'sub') {
+    if (userType === "sub") {
       user = await SubUser.findOne({
         resetToken: token,
-        resetTokenExpires: { $gt: new Date() }
+        resetTokenExpires: { $gt: new Date() },
       });
     } else {
       user = await User.findOne({
         resetToken: token,
-        resetTokenExpires: { $gt: new Date() }
+        resetTokenExpires: { $gt: new Date() },
       });
     }
 
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid or expired reset token'
+        message: "Invalid or expired reset token",
       });
     }
 
@@ -435,32 +466,42 @@ const resetPassword = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Password reset successful. Please login with your new password.'
+      message:
+        "Password reset successful. Please login with your new password.",
     });
   } catch (error) {
-    console.error('Password reset error:', error);
+    console.error("Password reset error:", error);
     res.status(500).json({
       success: false,
-      message: 'Password reset failed'
+      message: "Password reset failed",
     });
   }
 };
 
 /**
  * Verify email
+ * Supports both GET (with token in URL) and POST (with token in body)
  */
 const verifyEmail = async (req, res) => {
   try {
-    const { token } = req.params;
+    // Support both URL params (GET) and body (POST) for mobile apps
+    const token = req.params.token || req.body.token;
+
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: "Verification token is required",
+      });
+    }
 
     const user = await User.findOne({
-      verificationToken: token
+      verificationToken: token,
     });
 
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid verification token'
+        message: "Invalid verification token",
       });
     }
 
@@ -470,13 +511,21 @@ const verifyEmail = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Email verified successfully'
+      message: "Email verified successfully",
+      data: {
+        user: {
+          id: user._id,
+          email: user.email,
+          fullName: user.fullName,
+          emailVerified: user.emailVerified,
+        },
+      },
     });
   } catch (error) {
-    console.error('Email verification error:', error);
+    console.error("Email verification error:", error);
     res.status(500).json({
       success: false,
-      message: 'Email verification failed'
+      message: "Email verification failed",
     });
   }
 };
@@ -489,6 +538,5 @@ module.exports = {
   getProfile,
   requestPasswordReset,
   resetPassword,
-  verifyEmail
+  verifyEmail,
 };
-
