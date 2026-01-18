@@ -196,8 +196,8 @@ const login = async (req, res) => {
       data: {
         user:
           userType === "sub"
-            ? { ...user.toJSON(), parentUser: user.parentUserId }
-            : user.toJSON(),
+          ? { ...user.toJSON(), parentUser: user.parentUserId }
+          : user.toJSON(),
         tokens: {
           accessToken,
           refreshToken,
@@ -338,7 +338,7 @@ const getProfile = async (req, res) => {
       data: {
         user:
           req.userType === "sub"
-            ? { ...user.toJSON(), parentUser: user.parentUserId }
+          ? { ...user.toJSON(), parentUser: user.parentUserId }
             : user.toJSON(),
       },
     });

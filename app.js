@@ -8,6 +8,10 @@ const { connectDB } = require('./config/database');
 
 const app = express();
 
+// Trust proxy - Required when behind a reverse proxy (e.g., Render, Heroku, Nginx)
+// This allows express-rate-limit to correctly identify client IPs from X-Forwarded-For headers
+app.set('trust proxy', true);
+
 // CORS configuration for Android app
 app.use(cors({
   origin: [

@@ -1,6 +1,6 @@
 /**
  * Email Service Utility
- *
+ * 
  * Implements email functionality using Nodemailer
  * Supports multiple SMTP providers:
  * - Gmail
@@ -282,7 +282,7 @@ const sendPasswordResetEmail = async (email, token, userName = "") => {
   // Format: myapp://reset-password?token=xxx
   const appScheme = process.env.APP_SCHEME || "invoiceapp";
   const resetUrl = `${appScheme}://reset-password?token=${token}`;
-
+  
   if (!transporter) {
     // Email not configured, just log
     console.log("📧 [DEV MODE] Password reset email would be sent to:", email);
