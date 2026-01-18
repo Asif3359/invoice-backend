@@ -6,6 +6,8 @@ const invoiceSchema = {
   userEmail: { type: String, required: true },
   invoiceNumber: { type: String, required: true },
   invoiceDate: { type: Date, required: true },
+  invoiceNote: { type: String, default: '' },
+  invoiceRef: { type: String, default: '' },
   dueDate: { type: Date, required: true },
   clientId: { type: String, required: true },
   subtotal: { type: Number, default: 0 },
